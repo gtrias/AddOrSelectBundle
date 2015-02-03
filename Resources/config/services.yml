@@ -1,4 +1,10 @@
 services:
-#    gtrias_add_or_select.example:
-#        class: gtrias\AddOrSelectBundle\Example
-#        arguments: [@service_id, "plain_value", %parameter%]
+    app.form.type.add_or_select:
+        class: gtrias\AddOrSelectBundle\Form\Type\AddOrSelectType
+        tags:
+            - { name: form.type, alias: gtrias_addorselect }
+    gtrias.twig.extension.form:
+        class: gtrias\AddOrSelectBundle\Twig\Extension\FormExtension
+        arguments: ['@twig.form.renderer']
+        tags:
+            - { name: twig.extension}

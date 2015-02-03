@@ -13,8 +13,42 @@ use Symfony\Component\Form\Extension\Core\Type\DateType as BaseDateType;
 * DatetimeType
 *
 */
-class AddOrSelectBundleType extends AbstractType
+class AddOrSelectType extends AbstractType
 {
+    private $configs;
+
+    public function __construct(array $configs = array())
+    {
+        $this->configs = $configs;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function buildView(FormView $view, FormInterface $form, array $options)
+    {
+        $view->vars['configs'] = $options['configs'];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function setDefaultOptions(OptionsResolverInterface $resolver)
+    {
+        $defaults = $this->configs;
+        $resolver
+            ->setDefaults(array(
+                'configs'       => $defaults,
+                'transformer'   => null,
+            ))
+            ->setNormalizers(array(
+                'configs' => function (Options $options, $configs) use ($defaults) {
+                    return array_merge($defaults, $configs);
+                },
+            ))
+        ;
+    }
+
 
 	public function getParent()
 	{
@@ -24,6 +58,6 @@ class AddOrSelectBundleType extends AbstractType
 
 	public function getName()
 	{
-		return 'gtrias_addroselect';
+		return 'gtrias_addorselect';
 	}
 }
