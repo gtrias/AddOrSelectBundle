@@ -6,7 +6,7 @@
 		{% block gtrias_addorselect_javascript_prototype %}
 			{#$field.select2({{ configs|json_encode|raw }});#}
 			$field.select2({
-				createSearchChoice: function(term, data) { if ($(data).filter(function() { return this.text.localeCompare(term)===0; }).length===0) {return {id:term, text:term};} },
+				tags: "true"
 			});
 			{% endblock %}
     });

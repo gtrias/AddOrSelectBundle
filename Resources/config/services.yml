@@ -1,6 +1,7 @@
 services:
     app.form.type.add_or_select:
         class: gtrias\AddOrSelectBundle\Form\Type\AddOrSelectType
+        arguments: ['@doctrine']
         tags:
             - { name: form.type, alias: gtrias_addorselect }
     gtrias.twig.extension.form:
