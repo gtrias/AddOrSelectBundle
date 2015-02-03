@@ -51,7 +51,6 @@ class DynamicFormListener implements EventSubscriberInterface
 		$config = $form->getConfig();
 		$type = $config->getType()->getName();
 		$options = $config->getOptions();
-//ldd($type);
         $form->getParent()->add('levels', $type, array_replace($options, array(
 			'choices' => array($data => $data)
 		)));

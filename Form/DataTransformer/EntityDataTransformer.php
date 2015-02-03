@@ -29,9 +29,6 @@ class EntityDataTransformer implements DataTransformerInterface
 	 */
 	public function transform($entity)
 	{
-		//ldd($entity);
-		//
-		//transform($entityCollection);
 		return $entity;
 	}
 
@@ -46,7 +43,6 @@ class EntityDataTransformer implements DataTransformerInterface
 	 */
 	public function reverseTransform($data)
 	{
-		ldd($data);
 		$entityCollection = new ArrayCollection();
 
 		if ('' === $data || null === $data) {
