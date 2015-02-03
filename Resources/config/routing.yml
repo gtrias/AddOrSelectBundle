@@ -1,0 +1,3 @@
+gtrias_add_or_select_homepage:
+    path:     /hello/{name}
+    defaults: { _controller: gtriasAddOrSelectBundle:Default:index }
