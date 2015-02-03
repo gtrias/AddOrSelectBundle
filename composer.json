@@ -1,0 +1,24 @@
+{
+	"name": "gtrias/add-or-select-bundle",
+	"version": "0.1-alpha",
+	"description": "Symfony bundle for creating select or add From type",
+	"keywords": ["symfony", "select2"],
+	"type": "symfony-bundle",
+	"license": "MIT",
+	"authors": [
+	{
+		"name": "Genar Trias"
+	}
+	],
+		"require": {
+			"php": ">=5.3",
+			"symfony/framework-bundle": "2.*",
+			"symfony/symfony": "2.*"
+		},
+		"autoload": {
+			"psr-0": {
+				"gtrias\\AddOrSelectBundle": ""
+			}
+		},
+		"target-dir": "gtrias/AddOrSelectBundle"
+}
