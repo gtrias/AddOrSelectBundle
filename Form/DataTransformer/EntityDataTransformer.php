@@ -29,7 +29,10 @@ class EntityDataTransformer implements DataTransformerInterface
 	 */
 	public function transform($entity)
 	{
-		return $entity;
+		if($entity)
+			return $entity->getName();
+		else
+			return null;
 	}
 
 	/**
@@ -43,7 +46,7 @@ class EntityDataTransformer implements DataTransformerInterface
 	 */
 	public function reverseTransform($data)
 	{
-		$entityCollection = new ArrayCollection();
+		/*$entityCollection = new ArrayCollection();
 
 		if ('' === $data || null === $data) {
 			return $entityCollection;
@@ -65,6 +68,7 @@ class EntityDataTransformer implements DataTransformerInterface
 
 		$entityCollection->add($entity);
 
-		return $entityCollection;
+		return $entityCollection;*/
+		return $data;
 	}
 }

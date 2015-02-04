@@ -38,9 +38,9 @@ class AddOrSelectType extends EntityType
 	 */
 	public function buildForm(FormBuilderInterface $builder, array $options)
 	{
-		$builder->addModelTransformer(
-			new EntityDataTransformer( $this->registry, $options['class']), true
-		);
+		//$builder->addModelTransformer(
+			//new EntityDataTransformer( $this->registry, $options['class']), true
+		//);
 
 		$name = $builder->getName();
 
@@ -57,21 +57,28 @@ class AddOrSelectType extends EntityType
 		$em = $this->registry->getManager();
 
         $builder->addEventListener(
-            FormEvents::POST_SUBMIT,
+            FormEvents::PRE_SUBMIT,
             function (FormEvent $event) use ($options, $name, $em) {
                 // It's important here to fetch $event->getForm()->getData(), as
                 // $event->getData() will get you the client data (that is, the ID)
                 $data = $event->getData();
 
-				$prev_entity = $em->getRepository($options['class'])->findOneBy(array('name' => $data));
+				$entity = $em->getRepository($options['class'])->findOneBy(array('name' => $data));
 
-				if(!$prev_entity){
+				if(!$entity && is_numeric($data))
+					$entity = $em->getRepository($options['class'])->findOneBy(array('id' => $data));
+
+				if(!$entity){
+
 					$entity = new $options['class']();
 					$entity->setName($data);
 					$em->persist($entity);
 					$em->flush();
+
 				}
 
+				//TODO: Check this
+				$event->setData($entity->getId());
                 // since we've added the listener to the child, we'll have to pass on
                 // the parent to the callback functions!
                 //$formModifier($event->getForm()->getParent(), $data, $options, $name);
