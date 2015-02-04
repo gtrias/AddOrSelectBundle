@@ -10,17 +10,21 @@ use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolverInterface;
 use Symfony\Bridge\Doctrine\RegistryInterface;
 use gtrias\AddOrSelectBundle\Form\DataTransformer\EntityDataTransformer;
-use gtrias\AddOrSelectBundle\Form\Listener\DynamicFormListener;
+
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
+
+use Symfony\Component\Form\FormEvent;
+use Symfony\Component\Form\FormEvents;
 
 /**
 * DatetimeType
 *
 */
-class AddOrSelectType extends AbstractType
+class AddOrSelectType extends EntityType
 {
     private $configs;
 
-	private $registry;
+	protected $registry;
 
     public function __construct(RegistryInterface $registry, array $configs = array())
     {
@@ -34,11 +38,46 @@ class AddOrSelectType extends AbstractType
 	 */
 	public function buildForm(FormBuilderInterface $builder, array $options)
 	{
-		$builder->addViewTransformer(
+		$builder->addModelTransformer(
 			new EntityDataTransformer( $this->registry, $options['class']), true
 		);
 
-		$builder->addEventSubscriber(new DynamicFormListener($builder->getFormFactory()));
+		$name = $builder->getName();
+
+        $builder->addEventListener(
+            FormEvents::PRE_SET_DATA,
+            function (FormEvent $event) use ($options, $name) {
+                // this would be your entity, i.e. SportMeetup
+                $data = $event->getData();
+
+                //$formModifier($event->getForm()->getParent(), $data, $options, $name);
+            }
+        );
+
+		$em = $this->registry->getManager();
+
+        $builder->addEventListener(
+            FormEvents::POST_SUBMIT,
+            function (FormEvent $event) use ($options, $name, $em) {
+                // It's important here to fetch $event->getForm()->getData(), as
+                // $event->getData() will get you the client data (that is, the ID)
+                $data = $event->getData();
+
+				$prev_entity = $em->getRepository($options['class'])->findOneBy(array('name' => $data));
+
+				if(!$prev_entity){
+					$entity = new $options['class']();
+					$entity->setName($data);
+					$em->persist($entity);
+					$em->flush();
+				}
+
+                // since we've added the listener to the child, we'll have to pass on
+                // the parent to the callback functions!
+                //$formModifier($event->getForm()->getParent(), $data, $options, $name);
+            }
+        );
+
 	}
 
     /**
@@ -54,6 +93,9 @@ class AddOrSelectType extends AbstractType
      */
     public function setDefaultOptions(OptionsResolverInterface $resolver)
     {
+
+		parent::setDefaultOptions($resolver);
+
         $defaults = $this->configs;
         $resolver
             ->setDefaults(array(
@@ -66,6 +108,13 @@ class AddOrSelectType extends AbstractType
                 },
             ))
         ;
+
+		// ldd($resolver->offsetGet('choice_list'));
+
+        //$resolver->setDefaults(array(
+            //'choice_list' => $resolver->offsetGet('choice_list'),
+        //));
+
     }
 
 

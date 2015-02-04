@@ -46,17 +46,17 @@ class EntityDataTransformer implements DataTransformerInterface
 		$entityCollection = new ArrayCollection();
 
 		if ('' === $data || null === $data) {
-			return $tagCollection;
+			return $entityCollection;
 		}
 
 		if (!is_string($data)) {
 			throw new UnexpectedTypeException($data, 'string');
 		}
 
-		$tag = $this->em->getRepository($this->class)
-			->findOneBy(array('name' => $name));
+		$entity = $this->em->getRepository($this->class)
+			->findOneBy(array('name' => $data));
 
-		if (null === $tag) {
+		if (null === $entity) {
 			$entity = new $class();
 			$entity->setName($name);
 
