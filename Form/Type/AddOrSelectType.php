@@ -10,11 +10,11 @@ use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolverInterface;
 use Symfony\Bridge\Doctrine\RegistryInterface;
 use gtrias\AddOrSelectBundle\Form\DataTransformer\EntityDataTransformer;
+use Symfony\Component\Form\FormEvents;
 
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 
-use Symfony\Component\Form\FormEvent;
-use Symfony\Component\Form\FormEvents;
+use gtrias\AddOrSelectBundle\Form\EventListener\AddOrSelectFieldSubscriber;
 
 /**
 * DatetimeType
@@ -38,52 +38,19 @@ class AddOrSelectType extends EntityType
 	 */
 	public function buildForm(FormBuilderInterface $builder, array $options)
 	{
-		//$builder->addModelTransformer(
-			//new EntityDataTransformer( $this->registry, $options['class']), true
-		//);
+		/*$builder->addEventListener(FormEvents::POST_SUBMIT, function ($event) {
+			$event->stopPropagation();
+		}, 900); // Always set a higher priority than ValidationListener*/
 
 		$name = $builder->getName();
 
-        $builder->addEventListener(
-            FormEvents::PRE_SET_DATA,
-            function (FormEvent $event) use ($options, $name) {
-                // this would be your entity, i.e. SportMeetup
-                $data = $event->getData();
-
-                //$formModifier($event->getForm()->getParent(), $data, $options, $name);
-            }
-        );
-
 		$em = $this->registry->getManager();
 
-        $builder->addEventListener(
-            FormEvents::PRE_SUBMIT,
-            function (FormEvent $event) use ($options, $name, $em) {
-                // It's important here to fetch $event->getForm()->getData(), as
-                // $event->getData() will get you the client data (that is, the ID)
-                $data = $event->getData();
+        $builder->addEventSubscriber( new AddOrSelectFieldSubscriber($options, $name, $em) );
 
-				$entity = $em->getRepository($options['class'])->findOneBy(array('name' => $data));
+		$transformer = new EntityDataTransformer($this->registry, $options['class']);
 
-				if(!$entity && is_numeric($data))
-					$entity = $em->getRepository($options['class'])->findOneBy(array('id' => $data));
-
-				if(!$entity){
-
-					$entity = new $options['class']();
-					$entity->setName($data);
-					$em->persist($entity);
-					$em->flush();
-
-				}
-
-				//TODO: Check this
-				$event->setData($entity->getId());
-                // since we've added the listener to the child, we'll have to pass on
-                // the parent to the callback functions!
-                //$formModifier($event->getForm()->getParent(), $data, $options, $name);
-            }
-        );
+		$builder->addModelTransformer($transformer);
 
 	}
 
@@ -108,6 +75,8 @@ class AddOrSelectType extends EntityType
             ->setDefaults(array(
                 'configs'       => $defaults,
                 'transformer'   => null,
+				'csrf_protection' => false,
+				'validation-groups' => false,
             ))
             ->setNormalizers(array(
                 'configs' => function (Options $options, $configs) use ($defaults) {
@@ -116,19 +85,13 @@ class AddOrSelectType extends EntityType
             ))
         ;
 
-		// ldd($resolver->offsetGet('choice_list'));
-
-        //$resolver->setDefaults(array(
-            //'choice_list' => $resolver->offsetGet('choice_list'),
-        //));
-
     }
 
 
-	public function getParent()
+	/* public function getParent()
 	{
 		return 'entity';
-	}
+} */
 
 
 	public function getName()

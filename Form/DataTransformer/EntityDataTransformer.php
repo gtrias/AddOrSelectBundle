@@ -27,12 +27,12 @@ class EntityDataTransformer implements DataTransformerInterface
 	 * @return string | null An string representing the entity
 	 * @throws UnexpectedTypeException
 	 */
-	public function transform($entity)
+	public function transform($data)
 	{
-		if($entity)
-			return $entity->getName();
-		else
+		if($data === null)
 			return null;
+
+		return $data->getId();
 	}
 
 	/**
@@ -46,29 +46,19 @@ class EntityDataTransformer implements DataTransformerInterface
 	 */
 	public function reverseTransform($data)
 	{
-		/*$entityCollection = new ArrayCollection();
+		if($data === null)
+			return;
 
-		if ('' === $data || null === $data) {
-			return $entityCollection;
-		}
+		if($data instanceof $this->class)
+			return $data;
 
-		if (!is_string($data)) {
-			throw new UnexpectedTypeException($data, 'string');
-		}
+		$em = $this->em;
 
-		$entity = $this->em->getRepository($this->class)
-			->findOneBy(array('name' => $data));
+		$entity = $em->getRepository($this->class)->findOneBy(array('id' => $data));
 
-		if (null === $entity) {
-			$entity = new $class();
-			$entity->setName($name);
+		if(!$entity)
+			$entity = $em->getRepository($this->class)->findOneBy(array('name' => $data));
 
-			$this->em->persist($entity);
-		}
-
-		$entityCollection->add($entity);
-
-		return $entityCollection;*/
-		return $data;
+		return $entity->getName();
 	}
 }
