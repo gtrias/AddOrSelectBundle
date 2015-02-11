@@ -16,6 +16,8 @@ use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 
 use gtrias\AddOrSelectBundle\Form\EventListener\AddOrSelectFieldSubscriber;
 
+use gtrias\AddOrSelectBundle\Form\DataMapper\AddOrSelectDataMapper;
+
 /**
 * DatetimeType
 *
@@ -42,15 +44,14 @@ class AddOrSelectType extends EntityType
 			$event->stopPropagation();
 		}, 900); // Always set a higher priority than ValidationListener*/
 
-		$name = $builder->getName();
-
 		$em = $this->registry->getManager();
 
-        $builder->addEventSubscriber( new AddOrSelectFieldSubscriber($options, $name, $em) );
+        $builder->addEventSubscriber( new AddOrSelectFieldSubscriber($options, $options['base_property'], $em) );
+		// El transformer hace que no funcione la validacion del formulario, con esto desactivado se puede validar haciendo refresh en el primer error
+		//$builder->addViewTransformer(new EntityDataTransformer($this->registry, $options['class'], $options['base_property']));
+		//
 
-		$transformer = new EntityDataTransformer($this->registry, $options['class']);
-
-		$builder->addModelTransformer($transformer);
+		//$builder->setDataMapper(new AddOrSelectDataMapper($em));
 
 	}
 
@@ -74,7 +75,8 @@ class AddOrSelectType extends EntityType
         $resolver
             ->setDefaults(array(
                 'configs'       => $defaults,
-                'transformer'   => null,
+				'base_property' => 'name',
+                //'transformer'   => null,
 				'csrf_protection' => false,
 				'validation-groups' => false,
             ))
@@ -88,10 +90,10 @@ class AddOrSelectType extends EntityType
     }
 
 
-	/* public function getParent()
+	public function getParent()
 	{
 		return 'entity';
-} */
+	}
 
 
 	public function getName()
